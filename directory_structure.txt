@@ -1,0 +1,32 @@
+comp_triple/
+│
+├── data/               
+│   ├── train.tsv                     # tripleのIDベースデータ
+│   ├── entity2textlong.txt           # entity ID → 詳細テキスト
+│   ├── relation2text.txt             # relation ID → テキスト
+│   ├── triples_as_text.txt           # train.tsv のテキスト化版
+│   ├── naturalized_text.txt          # triples_as_text.txt を自然な言語表現にしたもの
+│
+├── triples_io/                       # 欠損トリプルの入出力用フォルダ
+│   ├── incomplete_triples.csv        # 欠損を含む入力トリプル
+│   ├── completed_triples.csv         # 補完済みトリプル（CSV形式）
+│   ├── completed_triples.json        # 補完済みトリプル（JSON形式）
+│
+├── db/                                # triplesベースのChroma DB
+│   ├── ...                            # 自動生成ファイル群
+│
+├── pdfs/                              # PDFファイル用フォルダ（未実装）
+│   ├── ...                            # 任意のPDFファイルを配置
+│
+├── pdf_db/                            # PDFベースのChroma DB（未実装）
+│   ├── ...                            # 自動生成ファイル群
+│
+├── generate_triples_as_text.py       # triples_as_text.txt を生成
+├── naturalize_triples_as_text.py     # triples_as_text.txt → naturalized_text.txt を生成
+├── embed_triples.py                  # naturalized_text.txt をベクトル化してDBに保存
+├── embed_pdfs.py                     # PDFファイルをベクトル化してDBに保存（未実装）
+├── triple_completion.py              # 各種DBを検索してLLMによって補完したトリプルを生成
+│
+├── requirements.txt                 
+├── .env                              
+└── README.md
