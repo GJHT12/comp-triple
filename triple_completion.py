@@ -3,8 +3,7 @@ import json
 import pandas as pd
 from operator import itemgetter
 from dotenv import load_dotenv
-from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
-from langchain_core.messages import SystemMessage
+from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
@@ -34,30 +33,31 @@ def initialize_output_files(csv_path, json_path):
 
 # RAGによるトリプル補完チェーンを作成
 def create_rag_chain(retriever):
-    prompt_template = ChatPromptTemplate.from_messages([
-        SystemMessage(
-            "You are an assistant that completes missing parts of a triple. "
-            "Respond with only the missing part.\n"
-            "Example:\n"
-            "Context:\n\n"
-            "Triple: ?, is the author of, Tractatus Logico-Philosophicus\n"
-            "Ludwig Wittgenstein\n"
-        ),
-        MessagesPlaceholder(variable_name="chat_history"),
-        HumanMessagePromptTemplate.from_template(
-            "Context:\n{context}\n\nComplete the following incomplete triple.\nTriple: {question}"
-        ),
-    ])
+    prompt = PromptTemplate.from_template(
+        """You are an assistant that completes missing parts of a triple.
+        Respond with only the missing part.
+
+        Example:
+        Context:
+
+        Triple: ?,is the author of,Tractatus Logico-Philosophicus
+        Ludwig Wittgenstein
+
+        Context:
+        {context}
+
+        Triple: {question}
+        """
+    )
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
     output_parser = StrOutputParser()
 
     rag_chain = (
         {
             "context": itemgetter("question") | retriever | format_docs,
-            "question": itemgetter("question"),
-            "chat_history": lambda _: [],
+            "question": itemgetter("question")
         }
-        | prompt_template
+        | prompt
         | llm
         | output_parser
     )
@@ -72,8 +72,7 @@ def complete_triple(triple, rag_chain):
 
     user_input = ", ".join([s if s != "?" else "?" for s in triple])
     response = rag_chain.invoke({
-        "question": user_input,
-        "chat_history": []
+        "question": user_input
     })
 
     completed = response.strip().strip('"').strip()

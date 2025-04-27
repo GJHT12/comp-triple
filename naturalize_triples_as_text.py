@@ -1,19 +1,21 @@
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 # テキスト形式トリプルを自然な文章に変換するチェーン
 def create_naturalize_chain():
-    prompt = ChatPromptTemplate.from_template(
+    prompt = PromptTemplate.from_template(
         "Using the information below, write a natural and coherent paragraph in English. Do not omit any details.\n\n{triple}"
     )
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    output_parser = StrOutputParser()
+
     return (
         {"triple": lambda x: x["triple"]}
         | prompt
         | llm
-        | StrOutputParser()
+        | output_parser
     )
 
 # テキスト形式トリプルファイルを、各トリプルごとに読み取る
